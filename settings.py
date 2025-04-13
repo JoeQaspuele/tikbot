@@ -15,4 +15,4 @@ CITY_LIMITS = {
     # Добавьте другие города по необходимости
 }
 
-DB_NAME = 'tickets_bot.db'
+DB_NAME = 'users.db'
