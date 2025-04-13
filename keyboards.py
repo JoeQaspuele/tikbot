@@ -1,6 +1,14 @@
 # keyboards.py
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
+def get_main_menu():
+    keyboard = [
+        [KeyboardButton("📦 Заказать билет")],
+        [KeyboardButton("📄 Последний заказ"), KeyboardButton("📚 Все заказы")]
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+
 def main_menu_keyboard():
     buttons = [
         [KeyboardButton("📦 Заказать билет")],
