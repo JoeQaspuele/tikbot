@@ -1,5 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, filters, ContextTypes
+from keyboards import registration_keyboard, get_main_menu # убедись, что импорт есть
 
 from db import add_user, user_exists
 from settings import CITY_LIMITS
@@ -12,7 +13,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Вы уже зарегистрированы.")
         return ConversationHandler.END
 
-    await update.message.reply_text("Привет! Добро пожаловать в бота.\nЕсли вы новый пользователь, нажмите 'Регистрация'")
+
+    await update.message.reply_text("Привет! Добро пожаловать в бота.\nЕсли вы новый пользователь, нажмите 'Регистрация'", reply_markup=registration_keyboard())
     return FIRST_NAME
 
 async def first_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,7 +56,7 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data["middle_name"],
             context.user_data["base_city"]
         )
-        await update.message.reply_text("✅ Вы успешно зарегистрированы!", reply_markup=ReplyKeyboardRemove())
+        await update.message.reply_text("✅ Вы успешно зарегистрированы!", reply_markup=get_main_menu())
     else:
         await update.message.reply_text("❌ Регистрация отменена.", reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
