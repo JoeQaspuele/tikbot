@@ -9,17 +9,21 @@ FIRST_NAME, LAST_NAME, MIDDLE_NAME, BASE_CITY, CONFIRM = range(5)
 
 
 # Старт бота — просто приветствие и кнопка "Регистрация"
+# start() — не должен возвращать END, если пользователь не зарегистрирован
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     if user_exists(user_id):
         await update.message.reply_text("Вы уже зарегистрированы.", reply_markup=get_main_menu())
         return ConversationHandler.END
 
+    # Просто показываем кнопку
     await update.message.reply_text(
         "Привет! Добро пожаловать в бота.\nЕсли вы новый пользователь, нажмите 'Регистрация'",
         reply_markup=registration_keyboard()
     )
-    return ConversationHandler.END  # ⛔ не переходим к регистрации сразу
+    # ❗ НЕ возвращай ConversationHandler.END здесь
+    return None  # или return
+
 
 
 # Начало регистрации при нажатии на кнопку "Регистрация"
