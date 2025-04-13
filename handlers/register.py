@@ -88,4 +88,16 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ConversationHandler для регистрации
 register_conv_handler = ConversationHandler(
     entry_points=[
-        MessageHandler
+        MessageHandler(filters.Regex("^📝 Регистрация$"), start_registration)
+    ],  # ← вот здесь была пропущена запятая
+    states={
+        FIRST_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, first_name)],
+        LAST_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, last_name)],
+        MIDDLE_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, middle_name)],
+        BASE_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, base_city)],
+        CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm)],
+    },
+    fallbacks=[],
+)
+
+
