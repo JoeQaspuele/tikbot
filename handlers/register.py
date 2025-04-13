@@ -1,36 +1,50 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, filters, ContextTypes
-from keyboards import registration_keyboard, get_main_menu # убедись, что импорт есть
 
+from keyboards import registration_keyboard, get_main_menu
 from db import add_user, user_exists
 from settings import CITY_LIMITS
 
 FIRST_NAME, LAST_NAME, MIDDLE_NAME, BASE_CITY, CONFIRM = range(5)
 
+
+# Старт бота — просто приветствие и кнопка "Регистрация"
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     if user_exists(user_id):
-        await update.message.reply_text("Вы уже зарегистрированы.")
+        await update.message.reply_text("Вы уже зарегистрированы.", reply_markup=get_main_menu())
         return ConversationHandler.END
 
+    await update.message.reply_text(
+        "Привет! Добро пожаловать в бота.\nЕсли вы новый пользователь, нажмите 'Регистрация'",
+        reply_markup=registration_keyboard()
+    )
+    return ConversationHandler.END  # ⛔ не переходим к регистрации сразу
 
-    await update.message.reply_text("Привет! Добро пожаловать в бота.\nЕсли вы новый пользователь, нажмите 'Регистрация'", reply_markup=registration_keyboard())
+
+# Начало регистрации при нажатии на кнопку "Регистрация"
+async def start_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Введите ваше имя:")
     return FIRST_NAME
+
 
 async def first_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["first_name"] = update.message.text.strip()
     await update.message.reply_text("Введите вашу фамилию:")
     return LAST_NAME
 
+
 async def last_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["last_name"] = update.message.text.strip()
     await update.message.reply_text("Введите ваше отчество:")
     return MIDDLE_NAME
 
+
 async def middle_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["middle_name"] = update.message.text.strip()
     await update.message.reply_text("Введите ваш базовый город:")
     return BASE_CITY
+
 
 async def base_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text.strip()
@@ -45,6 +59,7 @@ async def base_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     markup = ReplyKeyboardMarkup([["✅ Подтвердить", "❌ Отменить"]], resize_keyboard=True)
     await update.message.reply_text(confirm_text, reply_markup=markup)
     return CONFIRM
+
 
 async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "✅ Подтвердить":
@@ -61,14 +76,8 @@ async def confirm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Регистрация отменена.", reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
 
+
+# ConversationHandler для регистрации
 register_conv_handler = ConversationHandler(
-    entry_points=[CommandHandler("start", start)],
-    states={
-        FIRST_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, first_name)],
-        LAST_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, last_name)],
-        MIDDLE_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, middle_name)],
-        BASE_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, base_city)],
-        CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm)],
-    },
-    fallbacks=[],
-)
+    entry_points=[
+        MessageHandler
